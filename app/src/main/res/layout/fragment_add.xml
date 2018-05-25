@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.AddFragment"
+    android:fillViewport="true"
+    android:windowSoftInputMode="stateHidden">
+
+    <View
+        android:id="@+id/titleView"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:background="@color/primary" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/imageView2"
+        android:layout_alignParentStart="true"
+        android:textColor="@color/icons"
+        android:layout_marginStart="65dp"
+        android:layout_marginBottom="2dp"
+        android:text="@string/alarm_string" />
+
+    <Switch
+        android:id="@+id/switchAlert"
+        android:checked="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignTop="@+id/imageView2"
+        android:layout_marginStart="111dp" />
+
+    <ImageView
+        android:id="@+id/imageView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/titleEdit"
+        android:layout_marginTop="96dp"
+        android:layout_marginStart="5dp"
+        android:background="@drawable/ic_add_alarm_white_24dp" />
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/successAddEntryBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="26dp"
+        android:layout_marginTop="132dp"
+        android:background="@drawable/ic_check_white_24dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_check_white_24dp"
+        app:backgroundTint="@color/accent"
+        tools:layout_editor_absoluteX="319dp"
+        tools:layout_editor_absoluteY="139dp" />
+
+    <EditText
+        android:id="@+id/titleEdit"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dp"
+        android:ems="10"
+        android:hint="@string/add_title_string"
+        android:inputType="textPersonName"
+        android:textColor="@color/icons" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignStart="@+id/titleEdit"
+        android:layout_marginStart="5dp"
+        android:layout_marginTop="29dp"
+        android:text="@string/title_string"
+        android:textColor="@color/icons" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="150dp">
+
+        <RelativeLayout
+            android:id="@+id/relative"
+            android:layout_width="match_parent"
+            android:layout_height="360dp">
+
+            <EditText
+                android:id="@+id/placeEdit"
+                android:layout_width="200dp"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="35dp"
+                android:background="?attr/editTextBackground"
+                android:hint="@string/place_string"
+                android:textColor="@color/primary_text"
+                android:inputType="text" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_above="@+id/placeEdit"
+                android:layout_alignStart="@+id/placeEdit"
+                android:layout_marginBottom="-47dp"
+                android:layout_marginStart="5dp"
+                android:text="@string/place_string" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignStart="@+id/textView2"
+                android:layout_marginTop="93dp"
+                android:text="@string/date_string" />
+
+            <TextView
+                android:id="@+id/dateEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentStart="true"
+                android:layout_alignTop="@+id/textView3"
+                android:layout_marginStart="142dp"
+                android:textColor="@color/primary_text" />
+
+            <Switch
+                android:id="@+id/switchTime"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_alignBaseline="@+id/textView5"
+                android:layout_toEndOf="@+id/textView3" />
+
+            <TextView
+                android:id="@+id/textView5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentTop="true"
+                android:layout_alignStart="@+id/placeEdit"
+                android:layout_marginTop="130dp"
+                android:text="Time" />
+
+            <TextView
+                android:id="@+id/textView6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignTop="@+id/textView5"
+                android:layout_marginEnd="93dp"
+                android:text="@string/duration_string" />
+
+            <Switch
+                android:id="@+id/switchDuration"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:layout_alignBaseline="@+id/textView5"
+                android:layout_toEndOf="@+id/placeEdit" />
+
+            <TextView
+                android:id="@+id/timeEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/placeEdit"
+                android:layout_below="@+id/textView5"
+                android:layout_marginStart="-5dp"
+                android:background="?attr/editTextBackground" />
+
+            <TextView
+                android:id="@+id/durationEdit"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignStart="@+id/textView6"
+                android:layout_below="@+id/textView5"
+                android:background="?attr/editTextBackground"
+                android:text="@string/time_string" />
+
+            <View
+                android:layout_width="wrap_content"
+                android:layout_height="1dp"
+                android:layout_alignParentStart="true"
+                android:layout_below="@+id/durationEdit"
+                android:layout_marginBottom="16dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_marginTop="16dp"
+                android:background="@color/divider" />
+
+
+            <EditText
+                android:id="@+id/descriptionEdit"
+                android:layout_width="290dp"
+                android:layout_height="141dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:ems="10"
+                android:hint="@string/description_hint_string"
+                android:inputType="textMultiLine" />
+
+
+        </RelativeLayout>
+
+
+    </ScrollView>
+
+</RelativeLayout>

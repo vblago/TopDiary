@@ -1,0 +1,24 @@
+<resources>
+    <string name="app_name">TopDiary</string>
+    <string name="add_string">Add</string>
+    <string name="calendar_string">Calendar</string>
+
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="add_title_string">Enter the title</string>
+    <string name="title_string">Title</string>
+    <string name="date_string">Date:</string>
+    <string name="place_string">Enter the place</string>
+    <string name="time_string">10 min.</string>
+    <string name="cancel_string">Cancel</string>
+    <string name="alarm_string">Alarm</string>
+    <string name="m_string">m.</string>
+    <string name="h_string">h.</string>
+    <string name="set_string">Set</string>
+    <string name="description_hint_string">Description...</string>
+    <string name="duration_string">Duration</string>
+    <string name="choose_group_string">Choose group</string>
+    <string name="save_sting">Save</string>
+    <string name="alert_image_string">Alert Image</string>
+    <string name="search_string">Search...</string>
+
+</resources>
