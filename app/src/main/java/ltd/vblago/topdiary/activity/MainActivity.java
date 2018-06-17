@@ -8,22 +8,28 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
 
 import ltd.vblago.topdiary.R;
 import ltd.vblago.topdiary.fragment.AddFragment;
+import ltd.vblago.topdiary.fragment.AddGroupFragment;
 import ltd.vblago.topdiary.fragment.ChooseGroupFragment;
 import ltd.vblago.topdiary.fragment.DescriptionFragment;
 import ltd.vblago.topdiary.fragment.EditFragment;
 import ltd.vblago.topdiary.fragment.HistoryFragment;
+import ltd.vblago.topdiary.fragment.InfoFragment;
 import ltd.vblago.topdiary.fragment.MainFragment;
 import ltd.vblago.topdiary.model.Entry;
 import ltd.vblago.topdiary.model.FullList;
 import ltd.vblago.topdiary.model.NURE.TimeTable.TimeTable;
+import ltd.vblago.topdiary.util.EntryComparator;
 import ltd.vblago.topdiary.util.EventFormator;
 import ltd.vblago.topdiary.util.ForegroundService;
 import ltd.vblago.topdiary.util.MainActivityCallback;
@@ -55,7 +61,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         runMainFragment();
     }
 
-    private void runMainFragment(){
+    public void runMainFragment() {
         setActivityTitle("TopDiary");
         getSupportFragmentManager()
                 .beginTransaction()
@@ -64,40 +70,70 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         startService(new View(this));
     }
 
-    private void getTimeTableItemList(){
-        ReadTask readTask = new ReadTask(this, "timeTable");
-        if (readTask.fileExist()) {
-            ArrayList<Entry> list = readTask.getListNotBackground();
-            if (list != null){
-                timeTableList = list;
-                return;
-            }
-        }
+    private void getTimeTableItemList() {
         timeTableList = new ArrayList<>();
-    }
-
-    private void finderEntryList(){
-        SharedPreferences settings = getSharedPreferences(PERSISTANT_STORAGE_NAME, Context.MODE_PRIVATE);
-        boolean check = settings.getBoolean("timetable", false);
-        if (check){
-            for (Entry entry:timeTableList){
-                long startTime = entry.minStart;
-                if (startTime >= startPos && startTime <= endPos){
-                    list.add(entry);
+        ReadTask readTaskSet = new ReadTask(this, "timetable-set");
+        Set<String> set = (Set<String>) readTaskSet.getObjectNotBackground();
+        if (set == null) {
+            set = new HashSet<>();
+        }
+        for (String name : set) {
+            ReadTask readTask = new ReadTask(this, "timetable-" + name);
+            if (readTask.fileExist()) {
+                ArrayList<Entry> list = readTask.getListNotBackground();
+                if (list != null) {
+                    timeTableList.addAll(list);
                 }
             }
         }
 
-        for (Entry entry:fullList.fullList) {
+    }
+
+    private void finderEntryList() {
+        list = new ArrayList<>();
+        for (Entry entry : timeTableList) {
             long startTime = entry.minStart;
-            if (startTime >= startPos && startTime <= endPos){
+            if (startTime >= startPos && startTime <= endPos) {
                 list.add(entry);
             }
-            if (startTime < startPos && !entry.done){
+        }
+
+        for (Entry entry : fullList.fullList) {
+            long startTime = entry.minStart;
+            if (startTime >= startPos && startTime <= endPos) {
+                list.add(entry);
+            }
+            if (startTime < startPos && !entry.done) {
                 entry.type = 1;
                 list.add(entry);
             }
         }
+        list = filerDuplicatesAndSort(list);
+    }
+
+    public ArrayList<Entry> filerDuplicatesAndSort(ArrayList<Entry> list){
+        Comparator<Entry> comparator = new EntryComparator();
+        Collections.sort(list, comparator);
+        ArrayList<Entry> filterList = new ArrayList<>();
+        for (int i = 0; i < list.size() - 1; i++) {
+            boolean add = true;
+            for (int q = i + 1; q < list.size() - 1; q++){
+                if (list.get(i).minStart != list.get(q).minStart){
+                    break;
+                }
+                if (list.get(i).equals(list.get(q))) {
+                    add = false;
+                    break;
+                }
+            }
+            if (add) {
+                filterList.add(list.get(i));
+            }
+        }
+        if (list.size() != 0) {
+            filterList.add(list.get(list.size() - 1));
+        }
+        return filterList;
     }
 
     public void startService(View v) {
@@ -111,6 +147,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     public void stopService(View v) {
         Intent serviceIntent = new Intent(this, ForegroundService.class);
         stopService(serviceIntent);
+    }
+
+    @Override
+    public void refreshMainFragment() {
+        list = new ArrayList<>();
+        fullList = new FullList(this);
+        getTimeTableItemList();
+        finderEntryList();
+        runMainFragment();
     }
 
     @Override
@@ -163,12 +208,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
 
     @Override
     public void successEditEntry(Entry entry, int position) {
-        if (entry.minStart < startPos){
+        if (entry.minStart < startPos) {
             entry.type = 1;
             list.set(position, entry);
-        }else if (entry.minStart >= startPos && entry.minStart <= endPos){
+        } else if (entry.minStart >= startPos && entry.minStart <= endPos) {
             list.set(position, entry);
-        }else {
+        } else {
             fullList.removeItem(list.get(position).id);
             list.remove(position);
             fullList.addItem(entry);
@@ -197,7 +242,6 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         getSupportFragmentManager().popBackStack();
         getTimeTableItemList();
         finderEntryList();
-        runMainFragment();
     }
 
     @Override
@@ -242,32 +286,41 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         getSupportFragmentManager().popBackStack();
         getSupportFragmentManager().popBackStack();
         Calendar calendar = new GregorianCalendar();
-        calendar.setTimeInMillis(entry.minStart*1000*60);
+        calendar.setTimeInMillis(entry.minStart * 1000 * 60);
         openHistoryFragment(calendar);
     }
 
     @Override
     public void successEditEntry(Entry entry, Calendar calendar) {
-        fullList.fullList.set(entry.id, entry);
+        fullList.setItem(entry.id, entry);
         getSupportFragmentManager().popBackStack();
         getSupportFragmentManager().popBackStack();
-        openHistoryFragment(calendar);
+        long[] range = addHistoryTimeFrame(calendar);
+        if (range[0] != startPos) {
+            openHistoryFragment(calendar);
+        } else {
+            backChooseGroup();
+        }
+
     }
 
     @Override
     public void openHistoryFragment(Calendar calendar) {
         ArrayList<Entry> list = new ArrayList<>();
         long[] range = addHistoryTimeFrame(calendar);
-        for (Entry en:fullList.fullList){
-            if (range[0] <= en.minStart && en.minStart <= range[1]){
+        for (Entry en : fullList.fullList) {
+            if (range[0] <= en.minStart && en.minStart <= range[1]) {
                 list.add(en);
             }
         }
-        for (Entry en:timeTableList){
-            if (range[0] <= en.minStart && en.minStart <= range[1]){
+        for (Entry en : timeTableList) {
+            if (range[0] <= en.minStart && en.minStart <= range[1]) {
                 list.add(en);
             }
         }
+
+        list = filerDuplicatesAndSort(list);
+
         HistoryFragment historyFragment = HistoryFragment.newInstance(list, calendar);
 
         getSupportFragmentManager()
@@ -283,29 +336,61 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         setTitle(title);
     }
 
-    private static void addDayTimeFrame(){
+    @Override
+    public void openAddGroupFragment() {
+        AddGroupFragment addGroupFragment = new AddGroupFragment();
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .replace(R.id.activity_main, addGroupFragment, "add_group_fragment")
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void openInfoFragment() {
+        InfoFragment infoFragment = new InfoFragment();
+
+        getSupportFragmentManager()
+                .beginTransaction()
+                .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN)
+                .replace(R.id.activity_main, infoFragment, "info_fragment")
+                .addToBackStack(null)
+                .commit();
+    }
+
+    @Override
+    public void chooseGroupBack() {
+        getSupportFragmentManager().popBackStack();
+        getTimeTableItemList();
+        finderEntryList();
+        runMainFragment();
+    }
+
+    private static void addDayTimeFrame() {
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
 
-        startPos = calendar.getTimeInMillis()/1000L/60L;
+        startPos = calendar.getTimeInMillis() / 1000L / 60L;
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
-        endPos = calendar.getTimeInMillis()/1000L/60L;
+        endPos = calendar.getTimeInMillis() / 1000L / 60L;
     }
 
-    private static long[] addHistoryTimeFrame(Calendar calendar){
-        long [] range = new long[2];
+    private static long[] addHistoryTimeFrame(Calendar calendar) {
+        long[] range = new long[2];
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-        range[0] = calendar.getTimeInMillis()/1000L/60L;
+        range[0] = calendar.getTimeInMillis() / 1000L / 60L;
         calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
-        range[1] = calendar.getTimeInMillis()/1000L/60L;
+        range[1] = calendar.getTimeInMillis() / 1000L / 60L;
         return range;
     }
 
@@ -320,9 +405,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
 
-        final long mill = settings.getLong("last_sync", calendar.getTimeInMillis()-1);
+        final long mill = settings.getLong("last_sync", calendar.getTimeInMillis() - 1);
 
-        if (mill >= calendar.getTimeInMillis()){
+        if (mill >= calendar.getTimeInMillis()) {
             return;
         }
         Retrofit.getSchedule(id, type, new Callback<TimeTable>() {
@@ -347,15 +432,15 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         });
     }
 
-    public void addToEntryList(Entry entry){
+    public void addToEntryList(Entry entry) {
         long startTime = entry.minStart;
 
-        if (startTime >= startPos && startTime <= endPos){
+        if (startTime >= startPos && startTime <= endPos) {
             list.add(entry);
-        } else if (startTime < startPos && !entry.done){
+        } else if (startTime < startPos && !entry.done) {
             entry.type = 1;
             list.add(entry);
-        }else {
+        } else {
             fullList.addItem(entry);
         }
         fullList.save(list);

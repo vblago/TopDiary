@@ -9,19 +9,16 @@ import ltd.vblago.topdiary.util.WriteTask;
 
 public class FullList {
     public ArrayList<Entry> fullList;
-    public int lastIndex;
     private Context context;
 
     public FullList(Context context) {
         this.context = context;
         fullList = getFullItemList(context);
-        lastIndex = fullList.size() - 1;
     }
 
     public void addItem(Entry entry){
-        lastIndex++;
-        entry.id = lastIndex;
         fullList.add(entry);
+        fullList.get(fullList.indexOf(entry)).id = fullList.indexOf(entry);
     }
 
     public void removeItem(int id){
@@ -33,6 +30,11 @@ public class FullList {
                 return;
             }
         }
+    }
+
+    public void setItem(int id, Entry entry){
+        fullList.set(id, entry);
+        updateFullList();
     }
 
     public void save(ArrayList<Entry> list){

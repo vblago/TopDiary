@@ -75,4 +75,9 @@ public class Entry implements Serializable {
         return sdf.format(getCalendarStart().getTime());
     }
 
+    @Override
+    public boolean equals(Object obj) {
+        Entry entry = (Entry) obj;
+        return minStart == entry.minStart && minEnd == entry.minEnd && place.equals(entry.place) && title.equals(entry.title);
+    }
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import ltd.vblago.topdiary.model.Entry;
 
 public interface MainActivityCallback {
+    void refreshMainFragment();
     void addEntry();
     void cancelAddEntry();
     void successAddEntry(Entry entry);
@@ -22,4 +23,7 @@ public interface MainActivityCallback {
     void successEditEntry(Entry entry, Calendar calendar);
     void openHistoryFragment(Calendar calendar);
     void setActivityTitle(String title);
+    void openAddGroupFragment();
+    void chooseGroupBack();
+    void openInfoFragment();
 }

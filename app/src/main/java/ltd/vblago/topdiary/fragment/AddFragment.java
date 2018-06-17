@@ -91,7 +91,7 @@ public class AddFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.save:
-                mainActivityCallback.backChooseGroup();
+                mainActivityCallback.chooseGroupBack();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

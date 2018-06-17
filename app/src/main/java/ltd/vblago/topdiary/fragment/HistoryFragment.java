@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -67,6 +68,22 @@ public class HistoryFragment extends Fragment implements RecyclerAdapter.Adapter
         }
 
         dateTv.setText(formatDate(date));
+
+        root.setFocusableInTouchMode(true);
+        root.requestFocus();
+
+        root.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (event.getAction() == KeyEvent.ACTION_DOWN) {
+                    if (keyCode == KeyEvent.KEYCODE_BACK) {
+                        mainActivityCallback.chooseGroupBack();
+                        return true;
+                    }
+                }
+                return false;
+            }
+        });
 
         return root;
     }

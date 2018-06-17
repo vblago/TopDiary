@@ -93,6 +93,12 @@ public class MainFragment extends Fragment
             case R.id.groups:
                 mainActivityCallback.chooseGroup();
                 return true;
+            case R.id.refresh:
+                mainActivityCallback.refreshMainFragment();
+                return true;
+            case R.id.info:
+                mainActivityCallback.openInfoFragment();
+                return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -109,10 +115,6 @@ public class MainFragment extends Fragment
             mRecyclerView.setHasFixedSize(true);
             LinearLayoutManager mLayoutManager = new LinearLayoutManager(getContext());
             mRecyclerView.setLayoutManager(mLayoutManager);
-
-            Comparator<Entry> comparator = new EntryComparator();
-            Collections.sort(list, comparator);
-
             RecyclerAdapter mAdapter = new RecyclerAdapter(list, this);
             mRecyclerView.setAdapter(mAdapter);
         }

@@ -20,5 +20,12 @@
     <string name="save_sting">Save</string>
     <string name="alert_image_string">Alert Image</string>
     <string name="search_string">Search...</string>
+    <string name="choose_group_str">Choose group or teacher...</string>
+    <string name="info_str">Info</string>
+    <string name="refresh_str">Refresh</string>
+    <string name="add_a_new_task_str">Add a new task or entry</string>
+    <string name="open_tasks_from_selected_day_str">Open tasks from selected day</string>
+    <string name="info2_str">Also, you can edit or delete an item by long tap</string>
+    <string name="info1_str">Every day the student faces the question of planning a working day and because of the large volume of tasks, some tasks can be forgotten. Incorrectly distributed time for tasks can lead to a lack of time for special tasks. This can lead to negative consequences in the student\'s progress, as well as the loss of points in the surrender of one of the subjects. Therefore, it is extremely important to create a mobile diary, in which a structured schedule of the day will be stored, which will remind you in due time about the upcoming event. And for students of the Kharkov National University of Radio Electronics, the function of adding schedules of groups is built in. It will reduce the time to complete the schedule, which can be spent on preparing for any of the subjects.</string>
 
 </resources>

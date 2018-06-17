@@ -51,6 +51,10 @@ public class ReadTask extends AsyncTask<Void, Void, Object> {
     }
 
     public ArrayList<Entry> getListNotBackground(){
+        return (ArrayList<Entry>) getObjectNotBackground();
+    }
+
+    public Object getObjectNotBackground(){
         FileInputStream fis = null; //open stream for reading data from file_name file
         Object object = null;
         try {
@@ -69,7 +73,7 @@ public class ReadTask extends AsyncTask<Void, Void, Object> {
                 }
             }
         }
-        return (ArrayList<Entry>) object;
+        return object;
     }
 
     @Override
