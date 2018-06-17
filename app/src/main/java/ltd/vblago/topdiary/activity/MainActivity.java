@@ -67,10 +67,11 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         timeTableList = new ArrayList<>();
         ReadTask readTaskSet = new ReadTask(this, "timetable-model-list");
         ArrayList<ltd.vblago.topdiary.model.TimeTable> timeTableModelList = (ArrayList<ltd.vblago.topdiary.model.TimeTable>) readTaskSet.getObjectNotBackground();
-        if (timeTableModelList == null) {
-            timeTableList = new ArrayList<>();
+
+        if (timeTableModelList == null){
+            timeTableModelList = new ArrayList<>();
         }
-        for (ltd.vblago.topdiary.model.TimeTable timeTableModel : Objects.requireNonNull(timeTableModelList)) {
+        for (ltd.vblago.topdiary.model.TimeTable timeTableModel : timeTableModelList) {
             ReadTask readTask = new ReadTask(this, "timetable-" + timeTableModel.getName());
             if (readTask.fileExist()) {
                 ArrayList<Entry> list = readTask.getListNotBackground();
