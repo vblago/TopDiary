@@ -20,11 +20,9 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.TreeMap;
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,8 +58,7 @@ public class AddGroupFragment extends Fragment {
     Map<String, Integer> groupsMap;
     ArrayAdapter<String> adapter;
     MainActivityCallback mainActivityCallback;
-    private final String PERSISTANT_STORAGE_NAME = "SharedPreferences";
-    Set<String> set;
+    ArrayList<ltd.vblago.topdiary.model.TimeTable> timeTableModelList;
 
     @BindView(R.id.list_nure)
     ListView listNure;
@@ -134,9 +131,10 @@ public class AddGroupFragment extends Fragment {
             }
         });
 
-        SharedPreferences settings = getContext().getSharedPreferences(PERSISTANT_STORAGE_NAME, Context.MODE_PRIVATE);
-        String title = settings.getString("group_name", "none");
-        boolean checkTimetable = settings.getBoolean("timetable", true);
+        timeTableModelList = getListOfExistTimetables();
+        if (timeTableModelList == null){
+            timeTableModelList = new ArrayList<>();
+        }
 
         groupsMap = new TreeMap<>();
         groups = new ArrayList<>();
@@ -144,8 +142,6 @@ public class AddGroupFragment extends Fragment {
         groupSaveInstance = new ArrayList<>();
 
         unbinder = ButterKnife.bind(this, view);
-
-//        checkTimeTable.setChecked(checkTimetable);
 
         Retrofit.getNure(new Callback<Nure>() {
             @Override
@@ -214,17 +210,12 @@ public class AddGroupFragment extends Fragment {
         listNure.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                SharedPreferences settings = getContext().getSharedPreferences(PERSISTANT_STORAGE_NAME, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = settings.edit();
                 String name = groups.get(position);
-                editor.putInt("group_id", groupsMap.get(groups.get(position)));
-                editor.putString("group_name", name);
-                editor.apply();
 
                 if (name.replaceAll("[^ ]", "").length() >= 2) {
-                    getSchedule(2);
+                    getSchedule(name, groupsMap.get(groups.get(position)), 2);
                 } else {
-                    getSchedule(1);
+                    getSchedule(name, groupsMap.get(groups.get(position)), 1);
                 }
             }
         });
@@ -237,15 +228,9 @@ public class AddGroupFragment extends Fragment {
         inflater.inflate(R.menu.groups_menu, menu);
     }
 
-    private void getSchedule(final int type) {
+    private void getSchedule(final String name, final int id, final int type) {
+        String PERSISTANT_STORAGE_NAME = "SharedPreferences";
         final SharedPreferences settings = Objects.requireNonNull(getContext()).getSharedPreferences(PERSISTANT_STORAGE_NAME, Context.MODE_PRIVATE);
-        ReadTask readTask = new ReadTask(getContext(), "timetable-set");
-        set = (Set<String>) readTask.getObjectNotBackground();
-        if (set == null){
-            set = new HashSet<>();
-        }
-        int id = settings.getInt("group_id", 0);
-        final String name = settings.getString("group_name", "none");
 
         Retrofit.getSchedule(id, type, new Callback<TimeTable>() {
             @Override
@@ -253,24 +238,22 @@ public class AddGroupFragment extends Fragment {
                 ArrayList<Entry> timeTableList = EventFormator.format(timeTable);
                 WriteTask writeTask = new WriteTask(getContext(), "timetable-"+name, timeTableList);
                 writeTask.execute();
-                set.add(name);
+
+                ltd.vblago.topdiary.model.TimeTable timeTableModel = new ltd.vblago.topdiary.model.TimeTable(name, id, type);
+                timeTableModelList.add(timeTableModel);
 
                 SharedPreferences.Editor editor = settings.edit();
-
                 Calendar calendar = Calendar.getInstance();
                 calendar.set(Calendar.MINUTE, 0);
                 calendar.set(Calendar.HOUR_OF_DAY, 6);
-
                 editor.putLong("last_sync", calendar.getTimeInMillis());
-                editor.putBoolean("timetable", true);
-                editor.putInt("type", type);
                 editor.apply();
-                WriteTask writeTaskSet = new WriteTask(getContext(), "timetable-set", set);
+
+                WriteTask writeTaskSet = new WriteTask(getContext(), "timetable-model-list", timeTableModelList);
                 writeTaskSet.execute();
-//                checkTimeTable.setChecked(true);
-//                titleTv.setText(name);
+
                 if (getContext() != null){
-                    Toast.makeText(getContext(), "Successful change the group/teacher timetable", Toast.LENGTH_LONG).show();
+                    Toast.makeText(getContext(), "Successful add the group/teacher timetable", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -281,6 +264,11 @@ public class AddGroupFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private ArrayList<ltd.vblago.topdiary.model.TimeTable> getListOfExistTimetables() {
+        ReadTask readTask = new ReadTask(getContext(), "timetable-model-list");
+        return (ArrayList<ltd.vblago.topdiary.model.TimeTable>) readTask.getObjectNotBackground();
     }
 
     @Override

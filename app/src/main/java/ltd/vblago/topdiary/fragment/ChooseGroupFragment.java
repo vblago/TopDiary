@@ -31,6 +31,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import ltd.vblago.topdiary.R;
+import ltd.vblago.topdiary.model.TimeTable;
 import ltd.vblago.topdiary.util.DeleteTask;
 import ltd.vblago.topdiary.util.MainActivityCallback;
 import ltd.vblago.topdiary.util.ReadTask;
@@ -43,11 +44,9 @@ public class ChooseGroupFragment extends Fragment {
     MainActivityCallback mainActivityCallback;
     @BindView(R.id.list_timetables)
     ListView timeTablesLv;
-    Set<String> set;
+    ArrayList<TimeTable> timeTableModelList;
     ArrayList<String> list;
     View view;
-
-    private final String PERSISTANT_STORAGE_NAME = "SharedPreferences";
 
     public ChooseGroupFragment() {
         // Required empty public constructor
@@ -65,10 +64,15 @@ public class ChooseGroupFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_choose_group, container, false);
         unbinder = ButterKnife.bind(this, view);
 
+        timeTableModelList = getListOfExistTimetables();
         list = new ArrayList<>();
-        if (getListOfExistTimetables() != null){
-            list = new ArrayList<>(getListOfExistTimetables());
+        if (timeTableModelList == null){
+            timeTableModelList = new ArrayList<>();
         }
+        for (TimeTable timeTable:timeTableModelList) {
+            list.add(timeTable.getName());
+        }
+
         Collections.sort(list);
         adapter = new ArrayAdapter<>(Objects.requireNonNull(getContext()), android.R.layout.simple_list_item_1, list);
         timeTablesLv.setAdapter(adapter);
@@ -134,9 +138,9 @@ public class ChooseGroupFragment extends Fragment {
         }
     }
 
-    private Set<String> getListOfExistTimetables() {
-        ReadTask readTask = new ReadTask(getContext(), "timetable-set");
-        return  (Set<String>) readTask.getObjectNotBackground();
+    private ArrayList<TimeTable> getListOfExistTimetables() {
+        ReadTask readTask = new ReadTask(getContext(), "timetable-model-list");
+        return  (ArrayList<TimeTable>) readTask.getObjectNotBackground();
     }
 
     @Override
@@ -153,10 +157,12 @@ public class ChooseGroupFragment extends Fragment {
     private void deleteTimetable(String name){
         DeleteTask deleteTask = new DeleteTask(getContext(), name);
         deleteTask.execute();
-        ReadTask readTask = new ReadTask(getContext(), "timetable-set");
-        set = (Set<String>) readTask.getObjectNotBackground();
-        set.remove(name);
-        WriteTask writeTaskSet = new WriteTask(getContext(), "timetable-set", set);
+
+        int i = 0;
+        while (!timeTableModelList.get(i).getName().equals(name))i++;
+        timeTableModelList.remove(i);
+
+        WriteTask writeTaskSet = new WriteTask(getContext(), "timetable-model-list", timeTableModelList);
         writeTaskSet.execute();
     }
 

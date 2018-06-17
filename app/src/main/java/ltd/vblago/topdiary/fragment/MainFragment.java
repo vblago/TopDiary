@@ -16,12 +16,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
-import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -29,7 +27,6 @@ import butterknife.Unbinder;
 import ltd.vblago.topdiary.R;
 import ltd.vblago.topdiary.adapter.RecyclerAdapter;
 import ltd.vblago.topdiary.model.Entry;
-import ltd.vblago.topdiary.util.EntryComparator;
 import ltd.vblago.topdiary.util.MainActivityCallback;
 
 public class MainFragment extends Fragment
@@ -125,7 +122,7 @@ public class MainFragment extends Fragment
     private void datePicker() {
         historyCalendar = Calendar.getInstance();
         DatePickerDialog datePickerDialog = new DatePickerDialog(
-                getContext(), new DatePickerDialog.OnDateSetListener() {
+                Objects.requireNonNull(getContext()), new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
                 historyCalendar.set(Calendar.YEAR, year);

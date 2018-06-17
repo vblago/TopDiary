@@ -14,8 +14,7 @@ import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.Objects;
 
 import ltd.vblago.topdiary.R;
 import ltd.vblago.topdiary.fragment.AddFragment;
@@ -28,17 +27,11 @@ import ltd.vblago.topdiary.fragment.InfoFragment;
 import ltd.vblago.topdiary.fragment.MainFragment;
 import ltd.vblago.topdiary.model.Entry;
 import ltd.vblago.topdiary.model.FullList;
-import ltd.vblago.topdiary.model.NURE.TimeTable.TimeTable;
 import ltd.vblago.topdiary.util.EntryComparator;
-import ltd.vblago.topdiary.util.EventFormator;
 import ltd.vblago.topdiary.util.ForegroundService;
 import ltd.vblago.topdiary.util.MainActivityCallback;
 import ltd.vblago.topdiary.util.ReadTask;
-import ltd.vblago.topdiary.util.Retrofit;
-import ltd.vblago.topdiary.util.WriteTask;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import ltd.vblago.topdiary.util.RefreshTimetables;
 
 public class MainActivity extends AppCompatActivity implements MainActivityCallback {
 
@@ -47,12 +40,12 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     public ArrayList<Entry> list;
     public ArrayList<Entry> timeTableList;
     public FullList fullList;
-    private final String PERSISTANT_STORAGE_NAME = "SharedPreferences";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        refreshSchedule();
         addDayTimeFrame();
         list = new ArrayList<>();
         fullList = new FullList(this);
@@ -72,13 +65,13 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
 
     private void getTimeTableItemList() {
         timeTableList = new ArrayList<>();
-        ReadTask readTaskSet = new ReadTask(this, "timetable-set");
-        Set<String> set = (Set<String>) readTaskSet.getObjectNotBackground();
-        if (set == null) {
-            set = new HashSet<>();
+        ReadTask readTaskSet = new ReadTask(this, "timetable-model-list");
+        ArrayList<ltd.vblago.topdiary.model.TimeTable> timeTableModelList = (ArrayList<ltd.vblago.topdiary.model.TimeTable>) readTaskSet.getObjectNotBackground();
+        if (timeTableModelList == null) {
+            timeTableList = new ArrayList<>();
         }
-        for (String name : set) {
-            ReadTask readTask = new ReadTask(this, "timetable-" + name);
+        for (ltd.vblago.topdiary.model.TimeTable timeTableModel : Objects.requireNonNull(timeTableModelList)) {
+            ReadTask readTask = new ReadTask(this, "timetable-" + timeTableModel.getName());
             if (readTask.fileExist()) {
                 ArrayList<Entry> list = readTask.getListNotBackground();
                 if (list != null) {
@@ -153,6 +146,7 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
     public void refreshMainFragment() {
         list = new ArrayList<>();
         fullList = new FullList(this);
+        refreshSchedule();
         getTimeTableItemList();
         finderEntryList();
         runMainFragment();
@@ -394,11 +388,9 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
         return range;
     }
 
-    private void getSchedule() {
+    private void refreshSchedule() {
+        String PERSISTANT_STORAGE_NAME = "SharedPreferences";
         final SharedPreferences settings = getSharedPreferences(PERSISTANT_STORAGE_NAME, Context.MODE_PRIVATE);
-        int id = settings.getInt("group_id", 0);
-        final String name = settings.getString("group_name", "none");
-        final int type = settings.getInt("type", 1);
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(Calendar.HOUR_OF_DAY, 6);
@@ -407,29 +399,10 @@ public class MainActivity extends AppCompatActivity implements MainActivityCallb
 
         final long mill = settings.getLong("last_sync", calendar.getTimeInMillis() - 1);
 
-        if (mill >= calendar.getTimeInMillis()) {
-            return;
+        if (mill < calendar.getTimeInMillis()) {
+            RefreshTimetables refresh = new RefreshTimetables(this, settings);
+            refresh.execute();
         }
-        Retrofit.getSchedule(id, type, new Callback<TimeTable>() {
-            @Override
-            public void success(TimeTable timeTable, Response response) {
-                ArrayList<Entry> timeTableList = EventFormator.format(timeTable);
-                WriteTask writeTask = new WriteTask(getApplicationContext(), "timeTable", timeTableList);
-                writeTask.execute();
-                SharedPreferences.Editor editor = settings.edit();
-
-                Calendar calendar = Calendar.getInstance();
-
-                editor.putLong("last_sync", calendar.getTimeInMillis());
-                editor.putBoolean("timetable", true);
-                editor.putInt("type", type);
-                editor.apply();
-            }
-
-            @Override
-            public void failure(RetrofitError error) {
-            }
-        });
     }
 
     public void addToEntryList(Entry entry) {

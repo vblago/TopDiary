@@ -11,9 +11,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -32,7 +29,6 @@ import butterknife.Unbinder;
 import ltd.vblago.topdiary.R;
 import ltd.vblago.topdiary.adapter.RecyclerAdapter;
 import ltd.vblago.topdiary.model.Entry;
-import ltd.vblago.topdiary.model.FullList;
 import ltd.vblago.topdiary.util.EntryComparator;
 import ltd.vblago.topdiary.util.MainActivityCallback;
 
@@ -49,7 +45,7 @@ public class HistoryFragment extends Fragment implements RecyclerAdapter.Adapter
     Calendar date;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.fragment_history, container, false);
 
