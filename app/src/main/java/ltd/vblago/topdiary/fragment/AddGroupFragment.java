@@ -17,6 +17,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TreeMap;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnTextChanged;
@@ -132,7 +134,7 @@ public class AddGroupFragment extends Fragment {
         });
 
         timeTableModelList = getListOfExistTimetables();
-        if (timeTableModelList == null){
+        if (timeTableModelList == null) {
             timeTableModelList = new ArrayList<>();
         }
 
@@ -236,8 +238,13 @@ public class AddGroupFragment extends Fragment {
             @Override
             public void success(TimeTable timeTable, Response response) {
                 ArrayList<Entry> timeTableList = EventFormator.format(timeTable);
-                WriteTask writeTask = new WriteTask(getContext(), "timetable-"+name, timeTableList);
+                WriteTask writeTask = new WriteTask(getContext(), "timetable-" + name, timeTableList);
                 writeTask.execute();
+
+                if (timetableExist(name)){
+                    Toast.makeText(getContext(), "Successful refresh the group/teacher timetable", Toast.LENGTH_LONG).show();
+                    return;
+                }
 
                 ltd.vblago.topdiary.model.TimeTable timeTableModel = new ltd.vblago.topdiary.model.TimeTable(name, id, type);
                 timeTableModelList.add(timeTableModel);
@@ -252,18 +259,29 @@ public class AddGroupFragment extends Fragment {
                 WriteTask writeTaskSet = new WriteTask(getContext(), "timetable-model-list", timeTableModelList);
                 writeTaskSet.execute();
 
-                if (getContext() != null){
+                if (getContext() != null) {
                     Toast.makeText(getContext(), "Successful add the group/teacher timetable", Toast.LENGTH_LONG).show();
                 }
             }
 
             @Override
             public void failure(RetrofitError error) {
-                if (getContext() != null){
+                if (getContext() != null) {
                     Toast.makeText(getContext(), "The timetable for your group isn't posted on the cist.nure.ua", Toast.LENGTH_LONG).show();
                 }
             }
         });
+    }
+
+    private boolean timetableExist(String name) {
+        boolean ex = false;
+        for (ltd.vblago.topdiary.model.TimeTable timetable : timeTableModelList) {
+            if (timetable.getName().equals(name)){
+                ex = true;
+                break;
+            }
+        }
+        return ex;
     }
 
     private ArrayList<ltd.vblago.topdiary.model.TimeTable> getListOfExistTimetables() {
